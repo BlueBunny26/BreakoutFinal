@@ -173,17 +173,13 @@ Public Class Form1
     Private Sub DifficultySelected()
         startButton.Visible = False
         inMenu = False
-        InitTimers()
-        UpdateBestTimeLabel()
-        StartGame()
-    End Sub
-
-    Private Sub InitTimers()
         gameTimer = New Timer() With {.Interval = 8} ' ~60 FPS
         AddHandler gameTimer.Tick, AddressOf GameLoop
 
         runTimer = New Timer() With {.Interval = 1000} ' 1 second
         AddHandler runTimer.Tick, AddressOf RunTimer_Tick
+        UpdateBestTimeLabel()
+        StartGame()
     End Sub
 
     Private Sub RunTimer_Tick(sender As Object, e As EventArgs)
@@ -193,7 +189,7 @@ Public Class Form1
         bestTimeShown.Text = "Best time : " & If(GetCurrentBestTime() = 0, "--:--", formatTime(GetCurrentBestTime()))
         If currTime Mod 5 = 0 Then
             IncreaseBallSpeed(speedMult)
-            musicPlayer.SpeedRatio *= speedMult
+            musicPlayer.settings.rate *= speedMult
         End If
     End Sub
     Private Sub IncreaseBallSpeed(scale As Single)
@@ -207,10 +203,12 @@ Public Class Form1
         ballVel.Y = vy / mag * newMag
     End Sub
     Private Sub StartGame()
+        musicPlayer.settings.rate = 1
         moveLeft = False
         moveRight = False
         score = 0
         currTime = 0
+
         running = True
         timeShown.Visible = True
         bestTimeShown.Visible = True
@@ -261,11 +259,42 @@ Public Class Form1
 
         End If
 
+
         For i = 0 To bricks.Count - 1
             If ballRect.IntersectsWith(bricks(i)) Then
+                Dim curr = bricks(i)
+
+                Dim overlapLeft = ballRect.Right - curr.Left
+                Dim overlapRight = curr.Right - ballRect.Left
+                Dim overlapTop = ballRect.Bottom - curr.Top
+                Dim overlapBottom = curr.Bottom - ballRect.Top
+
+
+                Dim minX = Math.Min(overlapLeft, overlapRight)
+                Dim minY = Math.Min(overlapTop, overlapBottom)
+
+                If minX < minY Then
+
+                    If overlapLeft < overlapRight Then
+                        ballPos.X = curr.Left - ballRect.Width
+                        ballVel.X = -Math.Abs(ballVel.X)
+                    Else
+                        ballPos.X = curr.Right
+                        ballVel.X = Math.Abs(ballVel.X)
+                    End If
+                Else
+
+                    If overlapTop < overlapBottom Then
+                        ballPos.Y = curr.Top - ballRect.Height
+                        ballVel.Y = -Math.Abs(ballVel.Y)
+                    Else
+                        ballPos.Y = curr.Bottom
+                        ballVel.Y = Math.Abs(ballVel.Y)
+                    End If
+                End If
+
                 bricks.RemoveAt(i)
                 score += 1
-                ballVel.Y = -ballVel.Y
                 Exit For
             End If
         Next
@@ -310,6 +339,7 @@ Public Class Form1
     Private Sub ClearScreen()
         running = False
         If gameTimer IsNot Nothing Then gameTimer.Stop()
+        If runTimer IsNot Nothing Then runTimer.Stop()
         bricks = Nothing
         Invalidate()
     End Sub
@@ -348,6 +378,14 @@ Public Class Form1
     Private Sub Form1_KeyUp(sender As Object, e As KeyEventArgs) Handles MyBase.KeyUp
         If e.KeyCode = Keys.Left Then moveLeft = False
         If e.KeyCode = Keys.Right Then moveRight = False
+    End Sub
+
+    Private Sub Form1_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
+        Try
+            musicPlayer.controls.stop()
+            musicPlayer.close()
+        Catch
+        End Try
     End Sub
 End Class
 
