@@ -59,7 +59,7 @@ Public Class Form1
     Private rnd As New Random()
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Dim musicPath As String = IO.Path.Combine(Application.StartupPath, "galactic_rap.mp3")
+        Dim musicPath As String = IO.Path.Combine(Application.StartupPath, "Assets", "galactic_rap.mp3")
         If IO.File.Exists(musicPath) Then
             musicPlayer.URL = musicPath
             musicPlayer.settings.setMode("loop", True)
