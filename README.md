@@ -8,6 +8,6 @@ Licensed under Creative Commons: By Attribution 4.0
 https://creativecommons.org/licenses/by/4.0/
 
 
-TODO:
-- Power-Ups
-- Think of more things to do
+Realized an Extra Ball type power-up would require a rewrite of almost all ball-related logic
+too much work lol
+
