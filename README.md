@@ -11,3 +11,7 @@ https://creativecommons.org/licenses/by/4.0/
 Realized an Extra Ball type power-up would require a rewrite of almost all ball-related logic
 too much work lol
 
+TODO:
+ - Fix stuttering on ball speed update
+ - Timer on start
+ - Multiple lives per run
